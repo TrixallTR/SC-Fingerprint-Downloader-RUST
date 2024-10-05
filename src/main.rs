@@ -8,11 +8,11 @@ async fn main() {
     let mut fp = String::new();
     let mut url = String::new();
 
-    println!("Fingerprint File:");
-    io::stdin().read_line(&mut fp).expect("Enter a correct fp");
+    println!("Fingerprint File (e.g. fingerprint.json): ");
+    io::stdin().read_line(&mut fp).unwrap();
 
-    println!("Asset URL:");
-    io::stdin().read_line(&mut url).expect("Enter a correct url");
+    println!("Asset URL: (e.g. https://game-assets.brawlstarsgame.com): ");
+    io::stdin().read_line(&mut url).unwrap();
 
     url = url.trim().to_string();
 
