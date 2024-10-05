@@ -23,7 +23,6 @@ async fn main() {
     download(fp, url, 10).await;
 }
 
-
 async fn download_file(client: &reqwest::Client, url: String, file_path: String, file_name: String) {
     let path = Path::new(&file_path);
 
@@ -37,12 +36,12 @@ async fn download_file(client: &reqwest::Client, url: String, file_path: String,
             match response.status() {
                 StatusCode::OK => {
                     println!("Downloaded {}: Status {}", file_name, response.status());
-                    if let Some(parent) = path.parent() {
-                        create_dir_all(parent).unwrap();
-                    }
+
+                    create_dir_all(path.parent().unwrap()).unwrap();
                     let file = File::create(path).unwrap();
                     let mut writer = BufWriter::new(file);
                     let content = response.bytes().await.unwrap();
+                    
                     writer.write_all(&content).unwrap();
                     writer.flush().unwrap();
                 },
@@ -64,7 +63,7 @@ async fn download(fp: String, url: String, threads: usize) {
     println!("SHA: {}", sha);
 
     let mut tasks = Vec::new();
-    let client = reqwest::Client::new();
+    let client = Arc::new(reqwest::Client::new());
     let semaphore = Arc::new(Semaphore::new(threads));
 
     for file in fp_json["files"].as_array().unwrap() {
