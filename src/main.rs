@@ -63,20 +63,21 @@ async fn download(fp: String, url: String, threads: usize) {
     let sha = fp_json["sha"].as_str().unwrap().trim_matches('"').to_string();
     println!("SHA: {}", sha);
 
-    let mut tasks = vec![];
+    let mut tasks = Vec::new();
     let client = reqwest::Client::new();
     let semaphore = Arc::new(Semaphore::new(threads));
 
     for file in fp_json["files"].as_array().unwrap() {
         let file_name = file["file"].as_str().unwrap().trim_matches('"').to_string();
-        let full = format!("{url}{sha}/{file_name}");
+
+        let full_url = format!("{url}{sha}/{file_name}");
         let full_path = format!("{sha}/{file_name}");
 
         let permit = semaphore.clone().acquire_owned().await.unwrap();
         let client_clone = client.clone();
 
         let task = task::spawn(async move {
-            download_file(&client_clone, full, full_path, file_name).await;
+            download_file(&client_clone, full_url, full_path, file_name).await;
             drop(permit);
         });
 
