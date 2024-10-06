@@ -72,12 +72,12 @@ async fn download(fp: String, url: String, threads: usize) {
         let full_url = format!("{url}{sha}/{file_name}");
         let full_path = format!("{sha}/{file_name}");
 
-        let permit = semaphore.clone().acquire_owned().await.unwrap();
-        let client_clone = client.clone();
+        let semaphore_permit = semaphore.clone().acquire_owned().await.unwrap();
+        let client_clone = Arc::clone(&client);
 
         let task = task::spawn(async move {
             download_file(&client_clone, full_url, full_path, file_name).await;
-            drop(permit);
+            drop(semaphore_permit);
         });
 
         tasks.push(task);
